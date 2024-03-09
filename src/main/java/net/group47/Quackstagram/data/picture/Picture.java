@@ -53,7 +53,7 @@ public class Picture{
 
     public Picture uploadImage(File file){
         try {
-            Files.copy(file.toPath(), Paths.get(Handler.getPath() ,"img", "uploaded", uuid.toString() + ".png"), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.toPath(), Paths.get("img", "uploaded", uuid.toString() + ".png"), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,7 +63,7 @@ public class Picture{
 
 
     public ImageIcon getImage(int width, int height){
-        File path = new File(Handler.getPath() + "/img/uploaded/" + uuid.toString() + ".png");
+        File path = new File("img/uploaded/" + uuid.toString() + ".png");
         ImageIcon imageIcon;
         try {
             BufferedImage originalImage = ImageIO.read(path);

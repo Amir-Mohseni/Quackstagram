@@ -41,7 +41,7 @@ public class UserManager {
                 .setPrettyPrinting()
                 .create();
 
-        this.file = Paths.get(Handler.getPath(),"data", fileName).toFile();
+        this.file = Paths.get("data", fileName).toFile();
 
         if(containsSaves())
             load();

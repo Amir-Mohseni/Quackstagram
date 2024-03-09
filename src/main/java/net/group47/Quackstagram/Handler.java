@@ -9,17 +9,8 @@ import net.group47.Quackstagram.ui.type.SignInUI;
 import net.group47.Quackstagram.util.Hash;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 
 public class Handler {
-
-    @Getter
-    private static String path;
 
     @Getter
     private static DataManager dataManager;
@@ -29,14 +20,6 @@ public class Handler {
     private static Hash hash;
 
     public static void main(String[] args) {
-        try {
-            File file = new File(
-                    Handler.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-            path = file.getParentFile().getPath();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
         dataManager = new DataManager();
         uiManager = new UIManager();
         hash = new Hash();

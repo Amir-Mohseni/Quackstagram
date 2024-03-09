@@ -26,14 +26,8 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-jar {
-    manifest {
-        attributes('Main-Class': 'net.group47.Quackstagram.Handler')
-    }
-}
-
 
 shadowJar {
-    destinationDirectory = file('C:\\Users\\alexc\\Desktop\\Quackstagram')
+    destinationDirectory = file('C:\\Users\\alexc\\Desktop')
 }
 
