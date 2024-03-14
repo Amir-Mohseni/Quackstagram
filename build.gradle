@@ -28,6 +28,6 @@ tasks.withType(JavaCompile) {
 
 
 shadowJar {
-    destinationDirectory = file('C:\\Users\\alexc\\Desktop')
+    destinationDirectory = file('build/libs')
 }
 
