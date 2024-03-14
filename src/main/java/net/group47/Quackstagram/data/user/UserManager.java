@@ -41,8 +41,9 @@ public class UserManager {
                 .setPrettyPrinting()
                 .create();
 
-        this.file = Paths.get("data", fileName).toFile();
 
+        String filePath = "Quackstagram/src/main/java/net/group47/Quackstagram/data/users.json";
+        this.file = new File(filePath);
         if(containsSaves())
             load();
     }
@@ -90,7 +91,9 @@ public class UserManager {
     }
 
     private void load(){
-        List<User> loadedUsers;
+
+        List<User> loadedUsers = new ArrayList<>();
+        
         try(FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<User>>() {}.getType();
 
