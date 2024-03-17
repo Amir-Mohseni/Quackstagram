@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -23,8 +24,7 @@ public class User  {
     private String username;
     @Getter
     @Setter
-    private String bio;
-
+    private String bio, extension;
     @Getter
     private String hashedPassword;
     @Getter
@@ -41,7 +41,7 @@ public class User  {
 
 
 
-    public User(UUID uuid, String username, String hashedPassword, List<String> rawFollowers, List<String> rawFollowing, List<String> rawPictures, String bio, int postsCount) {
+    public User(UUID uuid, String username, String hashedPassword, List<String> rawFollowers, List<String> rawFollowing, List<String> rawPictures, String bio, String extension, int postsCount) {
         this.uuid = uuid;
         this.username = username;
         this.hashedPassword = hashedPassword;
@@ -49,6 +49,7 @@ public class User  {
         this.rawFollowing = rawFollowing;
         this.rawPictures = rawPictures;
         this.bio = bio;
+        this.extension = extension;
         this.postsCount = postsCount;
     }
 
@@ -105,16 +106,21 @@ public class User  {
 
     public ImageIcon getProfilePicture(int width, int height){
         return new ImageIcon(
-                new ImageIcon("img/storage/profile/" + username + ".png")
+                new ImageIcon(Paths.get("img", "storage", "profile",  username + "." + getExtension()).toString())
                         .getImage()
                         .getScaledInstance(width, height, Image.SCALE_SMOOTH));
     }
 
-    public void setProfilePicture(File file, String username) {
+    public void setProfilePicture(File file) {
+        if(!Handler.getUtil().isPhoto(file))
+            return;
+
+        setExtension(Handler.getUtil().getFileExtension(file));
+
         try {
             BufferedImage image = ImageIO.read(file);
-            File outputFile = new File("img/storage/profile/" + username + ".png");
-            ImageIO.write(image, "png", outputFile);
+            File outputFile = Paths.get("img", "storage", "profile",  username + "." + getExtension()).toFile();
+            ImageIO.write(image, getExtension(), outputFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

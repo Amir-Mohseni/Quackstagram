@@ -39,21 +39,27 @@ public class Picture{
     private Map<String, String> rawLikesData;
     @Getter
     @Setter
-    private String timePosted;
+    private String timePosted, extension;
 
 
 
-    public Picture(UUID uuid, UUID postedByUuid, String caption, List<String> rawLikes, Map<String, String> rawComments){
+    public Picture(UUID uuid, UUID postedByUuid, String caption, String extension, List<String> rawLikes, Map<String, String> rawComments){
         this.uuid = uuid;
         this.postedByUuid = postedByUuid;
         this.caption = caption;
         this.rawLikes = rawLikes;
+        this.extension = extension;
         this.rawComments = rawComments;
     }
 
     public Picture uploadImage(File file){
+        if(!Handler.getUtil().isPhoto(file))
+            return null;
+
+        setExtension(Handler.getUtil().getFileExtension(file));
         try {
-            Files.copy(file.toPath(), Paths.get("img", "uploaded", uuid.toString() + ".png"), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.toPath(), Paths.get("img", "uploaded", uuid.toString() + "." + getExtension()),
+                    StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,7 +69,7 @@ public class Picture{
 
 
     public ImageIcon getImage(int width, int height){
-        File path = new File("img/uploaded/" + uuid.toString() + ".png");
+        File path = Paths.get("img", "uploaded", uuid.toString() + "." + getExtension()).toFile();
         ImageIcon imageIcon;
         try {
             BufferedImage originalImage = ImageIO.read(path);

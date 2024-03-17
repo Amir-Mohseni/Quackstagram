@@ -102,6 +102,7 @@ public class ImageUploadUI extends JFrame {
                     UUID.randomUUID(),
                     user.getUuid(),
                     bioTextArea.getText(),
+                    "",
                     new ArrayList<>(),
                     new HashMap<>())
                     .uploadImage(selectedFile);

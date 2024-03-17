@@ -20,6 +20,7 @@ public class PictureWrapper implements JsonDeserializer<Picture>, JsonSerializer
         result.add("comments", context.serialize(src.getRawComments()));
         result.add("likes_data", context.serialize(src.getRawLikesData()));
         result.add("time_posted", new JsonPrimitive(src.getTimePosted()));
+        result.add("extension", new JsonPrimitive(src.getExtension()));
 
         return result;
     }
@@ -30,10 +31,11 @@ public class PictureWrapper implements JsonDeserializer<Picture>, JsonSerializer
         UUID uuid = UUID.fromString(object.get("uuid").getAsString());
         UUID postedByUuid = UUID.fromString(object.get("posted_by_uuid").getAsString());
         String caption = object.get("caption").getAsString();
+        String extension = object.get("extension").getAsString();
         List<String> likes = context.deserialize(object.get("likes"), List.class);
         Map<String, String> comments = context.deserialize(object.get("comments"), HashMap.class);
 
-        Picture picture = new Picture(uuid, postedByUuid, caption, likes, comments);
+        Picture picture = new Picture(uuid, postedByUuid, caption, extension, likes, comments);
         picture.setRawLikesData(context.deserialize(object.get("likes_data"), HashMap.class));
         picture.setTimePosted(object.get("time_posted").getAsString());
 

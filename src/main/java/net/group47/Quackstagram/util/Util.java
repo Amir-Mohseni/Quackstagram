@@ -4,11 +4,13 @@ package net.group47.Quackstagram.util;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 
-public class Hash {
+import java.io.File;
+
+public class Util {
 
     private Argon2 argon2;
 
-    public Hash(){
+    public Util(){
         this.argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id, 32, 64);
     }
 
@@ -20,4 +22,15 @@ public class Hash {
         return argon2.verify(hash, password.toCharArray());
     }
 
+    public String getFileExtension(File file){
+        String fileName = file.toString();
+        int index = fileName.lastIndexOf('.');
+
+        return fileName.substring(index + 1).toLowerCase();
+    }
+
+    public boolean isPhoto(File file){
+        String extension = getFileExtension(file);
+        return extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg");
+    }
 }

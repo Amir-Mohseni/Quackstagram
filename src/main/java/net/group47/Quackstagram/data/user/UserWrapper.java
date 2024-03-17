@@ -19,6 +19,7 @@ public class UserWrapper implements JsonSerializer<User>, JsonDeserializer<User>
         result.add("pictures", context.serialize(src.getRawPictures()));
         result.add("bio", new JsonPrimitive(src.getBio()));
         result.add("posts_count", new JsonPrimitive(src.getPostsCount()));
+        result.add("pfp_extension", new JsonPrimitive(src.getExtension()));
 
         return result;
     }
@@ -33,8 +34,9 @@ public class UserWrapper implements JsonSerializer<User>, JsonDeserializer<User>
         List<String> following = context.deserialize(object.get("following"), List.class);
         List<String> pictures = context.deserialize(object.get("pictures"), List.class);
         String bio = object.get("bio").getAsString();
+        String extension = object.get("pfp_extension").getAsString();
         int postsCount = object.get("posts_count").getAsInt();
 
-        return new User(uuid, username, hashedPassword, followers, following, pictures, bio, postsCount);
+        return new User(uuid, username, hashedPassword, followers, following, pictures, bio, extension, postsCount);
     }
 }

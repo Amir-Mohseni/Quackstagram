@@ -6,13 +6,10 @@ import net.group47.Quackstagram.Handler;
 import net.group47.Quackstagram.data.user.User;
 import net.group47.Quackstagram.ui.UI;
 import net.group47.Quackstagram.ui.UIUtil;
-import net.group47.Quackstagram.util.Hash;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -138,34 +135,41 @@ public class SignUpUI extends JFrame {
 
         if (Handler.getDataManager().forUsers().exists(username)) {
             JOptionPane.showMessageDialog(this, "Username already exists. Please choose a different username.", "Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            registeredUser = new User(
-                    UUID.randomUUID(),
-                    username,
-                    Handler.getHash().hash(password),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                    bio, 0);
-
-            Handler.getDataManager().forUsers().registerUser(registeredUser);
-            handleProfilePictureUpload(true);
-
-            Handler.getUiManager().display(UI.SIGN_IN);
+            return;
         }
+
+        if (getPossiblePicture() == null) {
+            JOptionPane.showMessageDialog(this, "Please upload a photo.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        registeredUser = new User(
+                UUID.randomUUID(),
+                username,
+                Handler.getUtil().hash(password),
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                bio, "", 0);
+
+        Handler.getDataManager().forUsers().registerUser(registeredUser);
+        handleProfilePictureUpload(true);
+
+        Handler.getUiManager().display(UI.SIGN_IN);
     }
 
      // Method to handle profile picture upload
      private void handleProfilePictureUpload(boolean infoCompleted) {
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes());
-        fileChooser.setFileFilter(filter);
+         if (!infoCompleted) {
+             JFileChooser fileChooser = new JFileChooser();
+             FileNameExtensionFilter filter = new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes());
+             fileChooser.setFileFilter(filter);
 
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+             if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                 File selectedFile = fileChooser.getSelectedFile();
 
-            if(!infoCompleted)
-                setPossiblePicture(selectedFile);
-            else registeredUser.setProfilePicture(selectedFile, usernameText.getText());
-        }
-    }
+                 setPossiblePicture(selectedFile);
+
+             }
+         } else registeredUser.setProfilePicture(getPossiblePicture());
+     }
 
 }

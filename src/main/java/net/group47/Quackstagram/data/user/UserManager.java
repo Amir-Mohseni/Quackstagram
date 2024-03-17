@@ -8,7 +8,6 @@ import lombok.Setter;
 import net.group47.Quackstagram.Handler;
 import net.group47.Quackstagram.data.picture.Picture;
 import net.group47.Quackstagram.data.picture.PictureWrapper;
-import net.group47.Quackstagram.util.Hash;
 
 import java.io.File;
 import java.io.FileReader;
@@ -35,22 +34,21 @@ public class UserManager {
     public UserManager(){
         this.users = new HashMap<>();
 
-        //loading all the pictures from the data file
+        //loading all the users from the data file
         this.gson = new GsonBuilder()
-                .registerTypeAdapter(Picture.class, new PictureWrapper())
+                .registerTypeAdapter(User.class, new UserWrapper())
                 .setPrettyPrinting()
                 .create();
 
 
-        String filePath = "Quackstagram/src/main/java/net/group47/Quackstagram/data/users.json";
-        this.file = new File(filePath);
+        this.file = Paths.get("data", fileName).toFile();
         if(containsSaves())
             load();
     }
 
     public User auth(String username, String password){
         User authenticatedUser = users.values().stream()
-                .filter(user -> Handler.getHash().matches(password, user.getHashedPassword()) && user.getUsername().equalsIgnoreCase(username))
+                .filter(user -> Handler.getUtil().matches(password, user.getHashedPassword()) && user.getUsername().equalsIgnoreCase(username))
                 .findFirst()
                 .orElse(null);
 
@@ -92,7 +90,7 @@ public class UserManager {
 
     private void load(){
 
-        List<User> loadedUsers = new ArrayList<>();
+        List<User> loadedUsers;
         
         try(FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<User>>() {}.getType();
