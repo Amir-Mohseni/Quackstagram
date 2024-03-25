@@ -18,7 +18,7 @@ public class SearchBar {
         for (User user : users) {
             if (currentUser.getUsername().equals(user.getUsername()))
                 continue;
-            if (user.getUsername().contains(query)) {
+            if (user.getUsername().startsWith(query)) {
                 results.add(user);
             }
         }

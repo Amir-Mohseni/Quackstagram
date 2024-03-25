@@ -27,10 +27,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class SearchUI extends JFrame {
-
-
-    private static final int IMAGE_SIZE = UIUtil.WIDTH / 3; // Size for each image in the grid
-
     public SearchUI() {
         setTitle("Search");
         setSize(UIUtil.WIDTH, UIUtil.HEIGHT);

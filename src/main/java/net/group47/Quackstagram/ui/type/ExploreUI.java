@@ -63,12 +63,10 @@ public class ExploreUI extends JFrame {
         // Search bar at the top
         JPanel searchPanel = new JPanel(new BorderLayout());
         JTextField searchField = new JTextField(" Search Users");
-        JButton searchButton = new JButton("Search");
-        searchPanel.add(searchButton, BorderLayout.EAST);
         searchPanel.add(searchField, BorderLayout.CENTER);
         searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, searchField.getPreferredSize().height)); // Limit the height
         //Click on the search bar to clear the default text
-        searchButton.addMouseListener(new MouseAdapter() {
+        searchField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 searchField.setText("");
