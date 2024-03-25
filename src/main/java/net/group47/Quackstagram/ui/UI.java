@@ -16,7 +16,8 @@ public enum UI {
     NOTIFICATIONS(NotificationsUI.class, "notification"),
     SIGN_IN(SignInUI.class, "sign_in"),
     SIGN_UP(SignUpUI.class, "sign_up"),
-    HOME(QuakstagramHomeUI.class, "home");
+    HOME(QuakstagramHomeUI.class, "home"),
+    SEARCH(SearchUI.class, "search");
 
 
     private final Class<? extends JFrame> clazz;

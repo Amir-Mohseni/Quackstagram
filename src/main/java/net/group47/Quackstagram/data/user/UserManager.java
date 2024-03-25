@@ -70,7 +70,7 @@ public class UserManager {
         return users.get(uuid);
     }
 
-    private List<User> getAsList(){
+    public List<User> getAsList(){
         return new ArrayList<>(users.values());
     }
 
