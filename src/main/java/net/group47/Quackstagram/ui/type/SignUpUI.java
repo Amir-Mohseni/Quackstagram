@@ -24,8 +24,6 @@ public class SignUpUI extends JFrame {
     private JButton registerButton;
     private JLabel photoLabel;
     private JButton photoUploadButton;
-    private final String credentialsFilePath = "data/credentials.txt";
-    private final String profilePhotoStoragePath = "img/storage/profile/";
     private JButton signInButton;
 
     private User registeredUser;
@@ -79,36 +77,19 @@ public class SignUpUI extends JFrame {
         fieldsPanel.setLayout(new BoxLayout(fieldsPanel, BoxLayout.Y_AXIS));
         fieldsPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
 
-        usernameText = new JTextField("Username");
-        passwordText = new JTextField("Password");
-        bioText = new JTextField("Bio");
-        bioText.setForeground(Color.GRAY);
-        usernameText.setForeground(Color.GRAY);
-        passwordText.setForeground(Color.GRAY);
+        initializeCridentials();
 
-        fieldsPanel.add(Box.createVerticalStrut(10));
-        fieldsPanel.add(photoPanel);
-        fieldsPanel.add(Box.createVerticalStrut(10));
-        fieldsPanel.add(usernameText);
-        fieldsPanel.add(Box.createVerticalStrut(10));
-        fieldsPanel.add(passwordText);
-        fieldsPanel.add(Box.createVerticalStrut(10));
+        setUpFieldsPanel(fieldsPanel, photoPanel);
         fieldsPanel.add(bioText);
+
         photoUploadButton = new JButton("Upload Photo");
-        
         photoUploadButton.addActionListener(e -> handleProfilePictureUpload(false));
         JPanel photoUploadPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         photoUploadPanel.add(photoUploadButton);
         fieldsPanel.add(photoUploadPanel);
 
-        // Register button with black text
-        registerButton = new JButton("Register");
-        registerButton.addActionListener(this::onRegisterClicked);
-        registerButton.setBackground(new Color(255, 90, 95)); // Use a red color that matches the mockup
-        registerButton.setForeground(Color.BLACK); // Set the text color to black
-        registerButton.setFocusPainted(false);
-        registerButton.setBorderPainted(false);
-        registerButton.setFont(new Font("Arial", Font.BOLD, 14));
+        addRegisterButton();
+
         JPanel registerPanel = new JPanel(new BorderLayout()); // Panel to contain the register button
         registerPanel.setBackground(Color.WHITE); // Background for the panel
         registerPanel.add(registerButton, BorderLayout.CENTER);
@@ -125,6 +106,36 @@ public class SignUpUI extends JFrame {
         });
 
         registerPanel.add(signInButton, BorderLayout.SOUTH);
+    }
+
+    private void setUpFieldsPanel(JPanel fieldsPanel, JPanel photoPanel) {
+        fieldsPanel.add(Box.createVerticalStrut(10));
+        fieldsPanel.add(photoPanel);
+        fieldsPanel.add(Box.createVerticalStrut(10));
+        fieldsPanel.add(usernameText);
+        fieldsPanel.add(Box.createVerticalStrut(10));
+        fieldsPanel.add(passwordText);
+        fieldsPanel.add(Box.createVerticalStrut(10));
+    }
+
+    private void initializeCridentials() {
+        usernameText = new JTextField("Username");
+        passwordText = new JTextField("Password");
+        bioText = new JTextField("Bio");
+        bioText.setForeground(Color.GRAY);
+        usernameText.setForeground(Color.GRAY);
+        passwordText.setForeground(Color.GRAY);
+    }
+
+    private void addRegisterButton() {
+        // Register button with black text
+        registerButton = new JButton("Register");
+        registerButton.addActionListener(this::onRegisterClicked);
+        registerButton.setBackground(new Color(255, 90, 95)); // Use a red color that matches the mockup
+        registerButton.setForeground(Color.BLACK); // Set the text color to black
+        registerButton.setFocusPainted(false);
+        registerButton.setBorderPainted(false);
+        registerButton.setFont(new Font("Arial", Font.BOLD, 14));
     }
 
 

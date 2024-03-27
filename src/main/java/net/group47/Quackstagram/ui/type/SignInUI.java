@@ -43,11 +43,7 @@ public class SignInUI extends JFrame {
         headerPanel.setPreferredSize(new Dimension(WIDTH, 40)); // Give the header a fixed height
 
         // Profile picture placeholder without border
-        lblPhoto = new JLabel();
-        lblPhoto.setPreferredSize(new Dimension(80, 80));
-        lblPhoto.setHorizontalAlignment(JLabel.CENTER);
-        lblPhoto.setVerticalAlignment(JLabel.CENTER);
-        lblPhoto.setIcon(new ImageIcon(new ImageIcon("img/logos/DACS.png").getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH)));
+        setLabelPhoto();
         JPanel photoPanel = new JPanel(); // Use a panel to center the photo label
         photoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         photoPanel.add(lblPhoto);
@@ -62,13 +58,7 @@ public class SignInUI extends JFrame {
         txtUsername.setForeground(Color.GRAY);
         txtPassword.setForeground(Color.GRAY);
 
-        fieldsPanel.add(Box.createVerticalStrut(10));
-        fieldsPanel.add(photoPanel);
-        fieldsPanel.add(Box.createVerticalStrut(10));
-        fieldsPanel.add(txtUsername);
-        fieldsPanel.add(Box.createVerticalStrut(10));
-        fieldsPanel.add(txtPassword);
-        fieldsPanel.add(Box.createVerticalStrut(10));
+        setUpFieldsPanel(fieldsPanel, photoPanel);
 
 
         // Register button with black text
@@ -88,6 +78,43 @@ public class SignInUI extends JFrame {
         add(fieldsPanel, BorderLayout.CENTER);
         add(registerPanel, BorderLayout.SOUTH);
 
+        addRegisterButton();
+
+        JPanel buttonPanel = getButtonPanel();
+
+        // Adding the button panel to the frame
+        add(buttonPanel, BorderLayout.SOUTH);
+
+    }
+
+    private void setUpFieldsPanel(JPanel fieldsPanel, JPanel photoPanel) {
+        fieldsPanel.add(Box.createVerticalStrut(10));
+        fieldsPanel.add(photoPanel);
+        fieldsPanel.add(Box.createVerticalStrut(10));
+        fieldsPanel.add(txtUsername);
+        fieldsPanel.add(Box.createVerticalStrut(10));
+        fieldsPanel.add(txtPassword);
+        fieldsPanel.add(Box.createVerticalStrut(10));
+    }
+
+    private void setLabelPhoto() {
+        lblPhoto = new JLabel();
+        lblPhoto.setPreferredSize(new Dimension(80, 80));
+        lblPhoto.setHorizontalAlignment(JLabel.CENTER);
+        lblPhoto.setVerticalAlignment(JLabel.CENTER);
+        lblPhoto.setIcon(new ImageIcon(new ImageIcon("img/logos/DACS.png").getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH)));
+    }
+
+    private JPanel getButtonPanel() {
+        // Panel to hold both buttons
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 10, 10)); // Grid layout with 1 row, 2 columns
+        buttonPanel.setBackground(Color.white);
+        buttonPanel.add(btnSignIn);
+        buttonPanel.add(btnRegisterNow);
+        return buttonPanel;
+    }
+
+    private void addRegisterButton() {
         // New button for navigating to main.ui.type.SignUpUI
         btnRegisterNow = new JButton("No Account? Register Now");
         btnRegisterNow.addActionListener(e -> Handler.getUiManager().display(UI.SIGN_UP));
@@ -95,16 +122,6 @@ public class SignInUI extends JFrame {
         btnRegisterNow.setForeground(Color.BLACK);
         btnRegisterNow.setFocusPainted(false);
         btnRegisterNow.setBorderPainted(false);
-
-        // Panel to hold both buttons
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 10, 10)); // Grid layout with 1 row, 2 columns
-        buttonPanel.setBackground(Color.white);
-        buttonPanel.add(btnSignIn);
-        buttonPanel.add(btnRegisterNow);
-
-        // Adding the button panel to the frame
-        add(buttonPanel, BorderLayout.SOUTH);
-
     }
 
     private void onSignInClicked(ActionEvent event) {
