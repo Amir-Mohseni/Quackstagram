@@ -8,7 +8,7 @@ public class DataManager {
 
     private PictureManager pictureManager;
     private UserManager userManager;
-    public DataManager(){
+    public DataManager() {
         this.pictureManager = new PictureManager();
         this.userManager = new UserManager();
 

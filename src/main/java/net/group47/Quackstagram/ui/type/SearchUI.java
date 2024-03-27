@@ -96,7 +96,7 @@ public class SearchUI extends JFrame {
         resultPanel.repaint();
 
         SearchBar searchBar = new SearchBar();
-        List<User> results = searchBar.search(Handler.getDataManager().forUsers().getCurrentUser(), query);
+        List<User> results = searchBar.search(query);
 
         if (results.isEmpty()) {
             JLabel noResultsLabel = new JLabel("No results found");

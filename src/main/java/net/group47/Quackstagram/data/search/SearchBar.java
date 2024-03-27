@@ -9,11 +9,12 @@ import java.util.List;
 public class SearchBar {
     List<User> results;
 
-    public List<User> search(User currentUser, String query){
+    public List<User> search(String query){
         //search for users
         results = new ArrayList<>();
 
         List <User> users = Handler.getDataManager().forUsers().getAsList();
+        User currentUser = Handler.getDataManager().forUsers().getCurrentUser();
 
         for (User user : users) {
             if (currentUser.getUsername().equals(user.getUsername()))
