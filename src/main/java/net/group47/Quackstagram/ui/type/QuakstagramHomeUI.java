@@ -119,17 +119,7 @@ public class QuakstagramHomeUI extends JFrame {
                 JLabel likesLabel = new JLabel("Likes: " + picture.getLikes().size());
                 likesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-                JButton likeButton = new JButton("❤");
-                likeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-                likeButton.setBackground(LIKE_BUTTON_COLOR); // Set the background color for the like button
-                likeButton.setOpaque(true);
-                likeButton.setBorderPainted(false); // Remove border
-                likeButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        handleLikeAction(picture, likesLabel);
-                    }
-                });
+                JButton likeButton = getLikeButton(picture, likesLabel);
 
                 itemPanel.add(nameLabel);
                 itemPanel.add(imageLabel);
@@ -155,6 +145,21 @@ public class QuakstagramHomeUI extends JFrame {
                 panel.add(spacingPanel);
 
             }
+    }
+
+    private JButton getLikeButton(Picture picture, JLabel likesLabel) {
+        JButton likeButton = new JButton("❤");
+        likeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        likeButton.setBackground(LIKE_BUTTON_COLOR); // Set the background color for the like button
+        likeButton.setOpaque(true);
+        likeButton.setBorderPainted(false); // Remove border
+        likeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleLikeAction(picture, likesLabel);
+            }
+        });
+        return likeButton;
     }
 
     private JPanel createHeaderPanel() {
@@ -212,12 +217,35 @@ public class QuakstagramHomeUI extends JFrame {
             }
         });
 
+        //View Profile
+        JButton viewProfile = new JButton("View Profile");
+        viewProfile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        //View Comments
+        JButton viewComments = new JButton("View Comments");
+        viewComments.addActionListener(new ActionListener() {
+                                           @Override
+                                           public void actionPerformed(ActionEvent e) {
+                                                  new CommentsUI(picture).setVisible(true);
+                                           }
+                                       });
+
+        userPanel.add(viewProfile);
+        userPanel.add(viewComments);
+
+
         // Information panel at the bottom
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.add(new JLabel(picture.getCaption())); // Description
         infoPanel.add(new JLabel("Likes:" + picture.getLikes().size())); // Likes
         infoPanel.add(likeButton);
+
 
         imageViewPanel.add(fullSizeImageLabel, BorderLayout.CENTER);
         imageViewPanel.add(infoPanel, BorderLayout.SOUTH);
