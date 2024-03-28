@@ -127,7 +127,13 @@ public class Picture{
         Handler.getDataManager().forPictures().save();
     }
 
+    public boolean hasLiked(User user) {
+        return rawLikes.contains(user.getUuid().toString());
+    }
+
     public void addLike(User user) {
+        if(hasLiked(user))
+            return;
         rawLikes.add(user.getUuid().toString());
         rawLikesData.put(user.getUuid().toString(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         Handler.getDataManager().forPictures().save();

@@ -186,7 +186,7 @@ public class InstagramProfileUI extends JFrame {
             imageLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    displayImage(picture.getImage(GRID_IMAGE_SIZE, GRID_IMAGE_SIZE)); // Call method to display the clicked image
+                    displayImage(picture); // Call method to display the clicked image
                 }
             });
             contentPanel.add(imageLabel);
@@ -202,8 +202,23 @@ public class InstagramProfileUI extends JFrame {
         repaint();
     }
 
+    private JPanel displayLikeCount(Picture picture) {
+        JPanel likePanel = new JPanel();
+        likePanel.setLayout(new BoxLayout(likePanel, BoxLayout.Y_AXIS));
+        likePanel.setBackground(new Color(249, 249, 249));
 
-    private void displayImage(ImageIcon imageIcon) {
+        JLabel likesLabel = new JLabel("Likes: " + picture.getRawLikes().size());
+        likesLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        likesLabel.setForeground(Color.BLACK);
+        likePanel.add(likesLabel);
+
+        return likePanel;
+
+    }
+
+
+    private void displayImage(Picture picture) {
+        ImageIcon imageIcon = picture.getImage(GRID_IMAGE_SIZE, GRID_IMAGE_SIZE);
         contentPanel.removeAll(); // Remove existing content
         contentPanel.setLayout(new BorderLayout()); // Change layout for image display
 
@@ -217,6 +232,9 @@ public class InstagramProfileUI extends JFrame {
             initializeUI(); // Re-initialize the UI
         });
         contentPanel.add(backButton, BorderLayout.SOUTH);
+
+        //add like count
+        contentPanel.add(displayLikeCount(picture), BorderLayout.NORTH);
 
         revalidate();
         repaint();
