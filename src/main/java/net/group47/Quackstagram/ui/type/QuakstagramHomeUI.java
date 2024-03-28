@@ -4,6 +4,7 @@ import net.group47.Quackstagram.Handler;
 import net.group47.Quackstagram.data.picture.Picture;
 import net.group47.Quackstagram.data.user.User;
 import net.group47.Quackstagram.ui.UI;
+import net.group47.Quackstagram.ui.UIManager;
 import net.group47.Quackstagram.ui.UIUtil;
 
 import javax.imageio.ImageIO;
@@ -217,15 +218,6 @@ public class QuakstagramHomeUI extends JFrame {
             }
         });
 
-        //View Profile
-        JButton viewProfile = new JButton("View Profile");
-        viewProfile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
-
         //View Comments
         JButton viewComments = new JButton("View Comments");
         viewComments.addActionListener(new ActionListener() {
@@ -235,7 +227,6 @@ public class QuakstagramHomeUI extends JFrame {
                                            }
                                        });
 
-        userPanel.add(viewProfile);
         userPanel.add(viewComments);
 
 
