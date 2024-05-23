@@ -1,54 +1,36 @@
 package net.group47.Quackstagram.data.user;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.group47.Quackstagram.Handler;
-import net.group47.Quackstagram.data.picture.Picture;
-import net.group47.Quackstagram.data.picture.PictureWrapper;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public class UserManager {
-    private String fileName = "users.json";
-    private File file;
-    private HashMap<UUID, User> users;
+
+    private HashMap<Integer, User> users;
 
     @Getter
     @Setter
     private User currentUser;
-    private Gson gson;
+
 
     public UserManager(){
         this.users = new HashMap<>();
 
-        //loading all the users from the data file
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(User.class, new UserWrapper())
-                .setPrettyPrinting()
-                .create();
-
-
-        this.file = Paths.get("data", fileName).toFile();
-        if(containsSaves())
-            load();
+        load();
     }
 
     public User auth(String username, String password){
         User authenticatedUser = users.values().stream()
-                .filter(user -> Handler.getUtil().matches(password, user.getHashedPassword()) && user.getUsername().equalsIgnoreCase(username))
+                .filter(user -> password.equals(user.getPassword()) && user.getUsername().equalsIgnoreCase(username))
                 .findFirst()
                 .orElse(null);
 
@@ -61,47 +43,65 @@ public class UserManager {
                 .anyMatch(user -> user.getUsername().equalsIgnoreCase(username));
     }
 
-    public void registerUser(User user){
-        users.put(user.getUuid(), user);
-        save();
+    public User registerUser(String username, String password, String bio){
+
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO users(username, password, bio) VALUES (?, ?, ?)");
+
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ps.setString(3, bio);
+
+            ps.executeUpdate();
+
+            PreparedStatement ps2 = connection.prepareStatement("SELECT MAX(user_id) FROM users");
+            ResultSet rs = ps2.executeQuery();
+            if(rs.next()){
+
+                User user = new User(rs.getInt(1) + 1, username, password, bio, 0, 0, 0);
+                users.put(user.getId(), user);
+
+                return user;
+
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 
-    public User getByUUID(UUID uuid){
-        return users.get(uuid);
+    public User getById(int id){
+        return users.get(id);
     }
 
     public List<User> getAsList(){
         return new ArrayList<>(users.values());
     }
 
-    private boolean containsSaves(){
-        return file.exists();
-    }
-
-    public void save(){
-        try {
-            if(!containsSaves())
-                Files.writeString(file.toPath(), gson.toJson(getAsList()), StandardOpenOption.CREATE);
-            else Files.writeString(file.toPath(), gson.toJson(getAsList()), StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void load(){
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users");
 
-        List<User> loadedUsers;
-        
-        try(FileReader reader = new FileReader(file)) {
-            Type listType = new TypeToken<List<User>>() {}.getType();
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                int id = rs.getInt("user_id");
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                String bio = rs.getString("bio");
+                int numFollowers = rs.getInt("num_followers");
+                int numFollowing = rs.getInt("num_following");
+                int numPosts = rs.getInt("num_posts");
 
-            loadedUsers = gson.fromJson(reader, listType);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                User user = new User(id, username, password, bio, numFollowers, numFollowing, numPosts);
 
-        for(User user : loadedUsers){
-            users.put(user.getUuid(), user);
+                users.put(user.getId(), user);
+            }
+
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }

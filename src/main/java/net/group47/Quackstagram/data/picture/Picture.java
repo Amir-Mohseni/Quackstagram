@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -24,41 +28,23 @@ import java.util.stream.Collectors;
 public class Picture{
 
     @Getter
-    private UUID uuid;
-    @Getter
-    @Setter
-    private UUID postedByUuid;
+    private int id, postedById;
     @Getter
     private String caption;
-    @Getter
-    private List<String> rawLikes;
-    @Getter
-    private Map<String, String> rawComments;
-    @Getter
-    @Setter
-    private Map<String, String> rawLikesData;
-    @Getter
-    @Setter
-    private String timePosted, extension;
 
 
-
-    public Picture(UUID uuid, UUID postedByUuid, String caption, String extension, List<String> rawLikes, Map<String, String> rawComments){
-        this.uuid = uuid;
-        this.postedByUuid = postedByUuid;
+    public Picture(int id, int postedById, String caption){
+        this.id = id;
+        this.postedById = postedById;
         this.caption = caption;
-        this.rawLikes = rawLikes;
-        this.extension = extension;
-        this.rawComments = rawComments;
     }
 
     public Picture uploadImage(File file){
         if(!Handler.getUtil().isPhoto(file))
             return null;
 
-        setExtension(Handler.getUtil().getFileExtension(file));
         try {
-            Files.copy(file.toPath(), Paths.get("img", "uploaded", uuid.toString() + "." + getExtension()),
+            Files.copy(file.toPath(), Paths.get("img", "uploaded", id + ".png"),
                     StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -67,9 +53,8 @@ public class Picture{
         return this;
     }
 
-
     public ImageIcon getImage(int width, int height){
-        File path = Paths.get("img", "uploaded", uuid.toString() + "." + getExtension()).toFile();
+        File path = Paths.get("img", "uploaded", id + ".png").toFile();
         ImageIcon imageIcon;
         try {
             BufferedImage originalImage = ImageIO.read(path);
@@ -87,56 +72,96 @@ public class Picture{
     }
 
     public List<User> getLikes(){
-        return rawLikes.stream()
-                .map(userUuid -> Handler.getDataManager().forUsers().getByUUID(UUID.fromString(userUuid)))
-                .collect(Collectors.toList());
+        List<User> users = new ArrayList<>();
+
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT user_id FROM likes WHERE post_id = ?");
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int userId = rs.getInt("user_id");
+
+                users.add(Handler.getDataManager().forUsers().getById(userId));
+            }
+
+
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+
+
+        return users;
     }
 
     public HashMap<User, LocalDateTime> getLikesData(){
         HashMap<User, LocalDateTime> map = new HashMap<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT user_id, date FROM likes WHERE post_id = ?");
+            ps.setInt(1, id);
 
-        for(Map.Entry<String, String> entry : rawLikesData.entrySet())
-            map.put(Handler.getDataManager().forUsers().getByUUID(
-                    UUID.fromString(entry.getKey())), LocalDateTime.parse(entry.getValue(), formatter));
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int userId = rs.getInt("user_id");
+
+                map.put(
+                        Handler.getDataManager().forUsers().getById(userId),
+                        rs.getTimestamp("date").toLocalDateTime());
+            }
+
+
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
 
         return map;
     }
 
-    public HashMap<User, String> getComments(){
-        HashMap<User, String> map = new HashMap<>();
-
-        for(Map.Entry<String, String> entry : rawComments.entrySet())
-            map.put(Handler.getDataManager().forUsers().getByUUID(UUID.fromString(entry.getKey())), entry.getValue());
-
-        return map;
-    }
 
     public LocalDateTime getWhenPosted(){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.parse(timePosted, formatter);
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT date FROM posts WHERE post_id = ?");
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+            if(rs.next())
+                return rs.getTimestamp("date").toLocalDateTime();
+
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+         }
+
+        return null;
     }
 
     public User getPostedBy(){
-        return Handler.getDataManager().forUsers().getByUUID(getPostedByUuid());
-    }
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT user_id FROM posts WHERE post_id = ?");
+            ps.setInt(1, id);
 
-    public void addComment(User user, String comment) {
-        rawComments.put(user.getUuid().toString(), comment);
-        Handler.getDataManager().forPictures().save();
-    }
+            ResultSet rs = ps.executeQuery();
+            if(rs.next())
+                return Handler.getDataManager().forUsers().getById(rs.getInt("user_id"));
 
-    public boolean hasLiked(User user) {
-        return rawLikes.contains(user.getUuid().toString());
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 
     public void addLike(User user) {
-        if(hasLiked(user))
-            return;
-        rawLikes.add(user.getUuid().toString());
-        rawLikesData.put(user.getUuid().toString(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        Handler.getDataManager().forPictures().save();
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO likes(post_id, user_id) VALUES (?, ?)");
+            ps.setInt(1, id);
+            ps.setInt(2, user.getId());
+
+            ps.executeUpdate();
+
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
     }
 
 }

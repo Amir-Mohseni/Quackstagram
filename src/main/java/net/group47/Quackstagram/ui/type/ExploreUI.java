@@ -154,7 +154,7 @@ public class ExploreUI extends JFrame {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JTextArea bioTextArea = new JTextArea(picture.getCaption());
         bioTextArea.setEditable(false);
-        JLabel likesLabel = new JLabel("Likes: " + picture.getRawLikes().size());
+        JLabel likesLabel = new JLabel("Likes: " + picture.getLikes().size());
         bottomPanel.add(bioTextArea, BorderLayout.CENTER);
         bottomPanel.add(likesLabel, BorderLayout.SOUTH);
 

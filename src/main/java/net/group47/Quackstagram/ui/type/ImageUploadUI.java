@@ -90,25 +90,23 @@ public class ImageUploadUI extends JFrame {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select an image file");
         fileChooser.setAcceptAllFileFilterUsed(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Image files", "png", "jpg", "jpeg");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Image files", "png");
         fileChooser.addChoosableFileFilter(filter);
 
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
 
-            User user = Handler.getDataManager().forUsers().getCurrentUser();
-            Picture picture = new Picture(
-                    UUID.randomUUID(),
-                    user.getUuid(),
-                    bioTextArea.getText(),
-                    "",
-                    new ArrayList<>(),
-                    new HashMap<>())
-                    .uploadImage(selectedFile);
+            if(!Handler.getUtil().isPhoto(selectedFile)) {
+                JOptionPane.showMessageDialog(this, "Invalid image file");
+                return;
+            }
 
-            Handler.getDataManager().forPictures().postPicture(
-                    user, picture);
+            User user = Handler.getDataManager().forUsers().getCurrentUser();
+
+            Picture picture = Handler.getDataManager().forPictures().postPicture(
+                    user, bioTextArea.getText(), selectedFile);
+
 
             ImageIcon imageIcon = picture.getImage(GRID_IMAGE_SIZE, GRID_IMAGE_SIZE);
 

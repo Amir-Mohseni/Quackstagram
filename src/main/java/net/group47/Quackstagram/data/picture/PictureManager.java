@@ -1,8 +1,5 @@
 package net.group47.Quackstagram.data.picture;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import net.group47.Quackstagram.Handler;
 import net.group47.Quackstagram.data.user.User;
 
@@ -11,6 +8,10 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -21,72 +22,64 @@ import java.util.UUID;
 public class PictureManager {
 
 
-    private String fileName = "pictures.json";
-    private File file;
-    private HashMap<UUID, Picture> pictures;
-    private Gson gson;
+    private HashMap<Integer, Picture> pictures;
 
     public PictureManager(){
         this.pictures = new HashMap<>();
 
-        //loading all the pictures from the data file
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(Picture.class, new PictureWrapper())
-                .setPrettyPrinting()
-                .create();
-
-        this.file = Paths.get("data", fileName).toFile();
-
-        if(containsSaves())
-            load();
+        load();
     }
 
-    public void postPicture(User user, Picture picture){
-        pictures.put(picture.getUuid(), picture);
-        picture.setPostedByUuid(user.getUuid());
-        picture.setRawLikesData(new HashMap<>());
+    public Picture postPicture(User user, String caption, File selectedFile){
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO posts(user_id, caption) VALUES (?, ?)");
+            ps.setInt(1, user.getId());
+            ps.setString(2, caption);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        picture.setTimePosted(LocalDateTime.now().format(formatter));
+            ps.executeUpdate();
 
-        user.addPicture(picture.getUuid());
-        Handler.getDataManager().saveAll();
+            PreparedStatement ps2 = connection.prepareStatement("SELECT MAX(post_id) FROM posts");
+            ResultSet rs = ps2.executeQuery();
+            if(rs.next()){
+                int id = rs.getInt(1);
+                Picture picture = new Picture(id + 1, user.getId(), caption);
+                picture.uploadImage(selectedFile);
+                pictures.put(picture.getId(), picture);
+
+                return picture;
+            }
+
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 
-    public Picture getByUUID(UUID uuid){
-        return pictures.get(uuid);
+    public Picture getById(int id){
+        return pictures.get(id);
     }
 
     public List<Picture> getAsList(){
         return new ArrayList<>(pictures.values());
     }
 
-    private boolean containsSaves(){
-        return file.exists();
-    }
-
-    public void save(){
-        try {
-            if(!containsSaves())
-                Files.writeString(file.toPath(), gson.toJson(getAsList()), StandardOpenOption.CREATE);
-            else Files.writeString(file.toPath(), gson.toJson(getAsList()), StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private void load(){
-        List<Picture> loadedPictures;
-        try(FileReader reader = new FileReader(file)) {
-            Type listType = new TypeToken<List<Picture>>() {}.getType();
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT post_id, user_id, caption FROM posts");
 
-            loadedPictures = gson.fromJson(reader, listType);
-        } catch (IOException e) {
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                int id = rs.getInt("post_id");
+                int userId = rs.getInt("user_id");
+                String caption = rs.getString("caption");
+
+                Picture picture = new Picture(id, userId, caption);
+                pictures.put(picture.getId(), picture);
+            }
+        }catch (SQLException e) {
             throw new RuntimeException(e);
-        }
-
-        for(Picture picture : loadedPictures){
-            pictures.put(picture.getUuid(), picture);
         }
     }
 }

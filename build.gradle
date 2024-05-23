@@ -17,8 +17,13 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation("de.mkammerer:argon2-jvm:2.11")
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    //implementation 'com.google.code.gson:gson:2.10.1'
+    //implementation("de.mkammerer:argon2-jvm:2.11")
+
+
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.28'
+
 
 }
 

@@ -12,6 +12,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -23,55 +27,55 @@ public class User  {
     @Getter
     private String username;
     @Getter
-    @Setter
-    private String bio, extension;
+    private String bio;
     @Getter
-    private String hashedPassword;
+    private String password;
     @Getter
-    @Setter
-    private int postsCount;
+    private int postsCount, followersCount, followingCount;
     @Getter
-    private List<String> rawFollowers;
-    @Getter
-    private List<String> rawFollowing;
-    @Getter
-    private List<String> rawPictures;
-    @Getter
-    private UUID uuid;
+    private int id;
 
-
-
-    public User(UUID uuid, String username, String hashedPassword, List<String> rawFollowers, List<String> rawFollowing, List<String> rawPictures, String bio, String extension, int postsCount) {
-        this.uuid = uuid;
+    public User(int id, String username, String password, String bio, int followersCount, int followingCount, int postsCount) {
+        this.id = id;
         this.username = username;
-        this.hashedPassword = hashedPassword;
-        this.rawFollowers = rawFollowers;
-        this.rawFollowing = rawFollowing;
-        this.rawPictures = rawPictures;
+        this.password = password;
         this.bio = bio;
-        this.extension = extension;
         this.postsCount = postsCount;
-    }
-
-    public void addFollowing(UUID userUuid){
-        getRawFollowers().add(userUuid.toString());
+        this.followersCount = followersCount;
+        this.followingCount = followingCount;
     }
 
     public void follow(User user){
-        getRawFollowing().add(user.getUuid().toString());
-        user.getRawFollowers().add(this.getUuid().toString());
-        Handler.getDataManager().forUsers().save();
-    }
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO follows(follower_id, followed_id) VALUES (?, ?)");
+            ps.setInt(1, getId());
+            ps.setInt(2, user.getId());
 
-    public void addPicture(UUID pictureUuid) {
-        rawPictures.add(pictureUuid.toString());
-        postsCount++;
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Picture> getPostedPictures(){
-        return rawPictures.stream()
-                .map(pictureUuid -> Handler.getDataManager().forPictures().getByUUID(UUID.fromString(pictureUuid)))
-                .collect(Collectors.toList());
+        List<Picture> pictures = new ArrayList<>();
+
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT post_id FROM posts WHERE user_id = ?");
+            ps.setInt(1, getId());
+
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                int postId = rs.getInt("post_id");
+                pictures.add(Handler.getDataManager().forPictures().getById(postId));
+            }
+
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return pictures;
     }
 
     public HashMap<User, LocalDateTime> getNotificationsSorted(){
@@ -93,20 +97,50 @@ public class User  {
     }
 
     public List<User> getFollowing(){
-        return rawFollowing.stream()
-                .map(followingUuid -> Handler.getDataManager().forUsers().getByUUID(UUID.fromString(followingUuid)))
-                .collect(Collectors.toList());
+        List<User> users = new ArrayList<>();
+
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT followed_id FROM follows WHERE follower_id = ?");
+            ps.setInt(1, getId());
+
+            ResultSet rs = ps.executeQuery();
+
+            while(rs.next()) {
+                int followingId = rs.getInt("followed_id");
+                users.add(Handler.getDataManager().forUsers().getById(followingId));
+            }
+
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return users;
     }
 
     public List<User> getFollowers(){
-        return rawFollowers.stream()
-                .map(followingUuid -> Handler.getDataManager().forUsers().getByUUID(UUID.fromString(followingUuid)))
-                .collect(Collectors.toList());
+        List<User> users = new ArrayList<>();
+
+        try(Connection connection = Handler.getDataManager().getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("SELECT follower_id FROM follows WHERE followed_id = ?");
+            ps.setInt(1, getId());
+
+            ResultSet rs = ps.executeQuery();
+
+            while(rs.next()) {
+                int followingId = rs.getInt("follower_id");
+                users.add(Handler.getDataManager().forUsers().getById(followingId));
+            }
+
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return users;
     }
 
     public ImageIcon getProfilePicture(int width, int height){
         return new ImageIcon(
-                new ImageIcon(Paths.get("img", "storage", "profile",  username + "." + getExtension()).toString())
+                new ImageIcon(Paths.get("img", "storage", "profile",  username + ".png").toString())
                         .getImage()
                         .getScaledInstance(width, height, Image.SCALE_SMOOTH));
     }
@@ -115,15 +149,20 @@ public class User  {
         if(!Handler.getUtil().isPhoto(file))
             return;
 
-        setExtension(Handler.getUtil().getFileExtension(file));
-
         try {
             BufferedImage image = ImageIO.read(file);
-            File outputFile = Paths.get("img", "storage", "profile",  username + "." + getExtension()).toFile();
-            ImageIO.write(image, getExtension(), outputFile);
+            File outputFile = Paths.get("img", "storage", "profile",  username + ".png").toFile();
+            ImageIO.write(image, "png", outputFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof User)) return false;
+        User other = (User) obj;
+
+        return other.id == id;
+    }
 }

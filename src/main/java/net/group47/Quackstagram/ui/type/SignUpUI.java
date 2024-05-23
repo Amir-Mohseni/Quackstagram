@@ -154,14 +154,8 @@ public class SignUpUI extends JFrame {
             return;
         }
 
-        registeredUser = new User(
-                UUID.randomUUID(),
-                username,
-                Handler.getUtil().hash(password),
-                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                bio, "", 0);
+        registeredUser = Handler.getDataManager().forUsers().registerUser(username, password, bio);
 
-        Handler.getDataManager().forUsers().registerUser(registeredUser);
         handleProfilePictureUpload(true);
 
         Handler.getUiManager().display(UI.SIGN_IN);

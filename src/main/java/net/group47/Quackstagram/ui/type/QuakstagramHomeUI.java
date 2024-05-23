@@ -180,13 +180,13 @@ public class QuakstagramHomeUI extends JFrame {
         User currentUser = Handler.getDataManager().forUsers().getCurrentUser();
         picture.addLike(currentUser);
 
-        likesLabel.setText("Likes: " + picture.getRawLikes().size());
+        likesLabel.setText("Likes: " + picture.getLikes().size());
     }
 
     private void displayImage(Picture picture) {
         imageViewPanel.removeAll(); // Clear previous content
 
-        JLabel likesLabel = new JLabel("Likes: " + picture.getRawLikes().size()); // Update this line
+        JLabel likesLabel = new JLabel("Likes: " + picture.getLikes().size()); // Update this line
 
         // Display the image
         JLabel fullSizeImageLabel = new JLabel();
@@ -218,16 +218,16 @@ public class QuakstagramHomeUI extends JFrame {
             }
         });
 
-        //View Comments
-        JButton viewComments = new JButton("View Comments");
-        viewComments.addActionListener(new ActionListener() {
-                                           @Override
-                                           public void actionPerformed(ActionEvent e) {
-                                                  new CommentsUI(picture).setVisible(true);
-                                           }
-                                       });
-
-        userPanel.add(viewComments);
+//        //View Comments
+//        JButton viewComments = new JButton("View Comments");
+//        viewComments.addActionListener(new ActionListener() {
+//                                           @Override
+//                                           public void actionPerformed(ActionEvent e) {
+//                                                  new CommentsUI(picture).setVisible(true);
+//                                           }
+//                                       });
+//
+//        userPanel.add(viewComments);
 
 
         // Information panel at the bottom

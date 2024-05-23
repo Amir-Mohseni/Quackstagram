@@ -84,7 +84,7 @@ public class InstagramProfileUI extends JFrame {
 
     private JPanel createHeaderPanel() {
         User loggedInUser = Handler.getDataManager().forUsers().getCurrentUser();
-        boolean isCurrentUser = loggedInUser.getUuid().equals(currentUser.getUuid());
+        boolean isCurrentUser = loggedInUser.getId() == currentUser.getId();
 
         // Header Panel
         JPanel headerPanel = new JPanel();
@@ -106,8 +106,8 @@ public class InstagramProfileUI extends JFrame {
         statsPanel.setBackground(new Color(249, 249, 249));
         System.out.println("Number of posts for this user" + currentUser.getPostsCount());
         statsPanel.add(createStatLabel(Integer.toString(currentUser.getPostsCount()), "Posts"));
-        statsPanel.add(createStatLabel(Integer.toString(currentUser.getRawFollowers().size()), "Followers"));
-        statsPanel.add(createStatLabel(Integer.toString(currentUser.getRawFollowing().size()), "Following"));
+        statsPanel.add(createStatLabel(Integer.toString(currentUser.getFollowersCount()), "Followers"));
+        statsPanel.add(createStatLabel(Integer.toString(currentUser.getFollowingCount()), "Following"));
         statsPanel.setBorder(BorderFactory.createEmptyBorder(25, 0, 10, 0)); // Add some vertical padding
 
 
@@ -120,7 +120,7 @@ public class InstagramProfileUI extends JFrame {
         } else {
             followButton = new JButton("Follow");
 
-            if(currentUser.getRawFollowers().contains(loggedInUser.getUuid().toString())) {
+            if(currentUser.getFollowers().contains(loggedInUser)) {
                 followButton.setText("Following");
             } else {
                 followButton.addActionListener(e -> {
@@ -207,7 +207,7 @@ public class InstagramProfileUI extends JFrame {
         likePanel.setLayout(new BoxLayout(likePanel, BoxLayout.Y_AXIS));
         likePanel.setBackground(new Color(249, 249, 249));
 
-        JLabel likesLabel = new JLabel("Likes: " + picture.getRawLikes().size());
+        JLabel likesLabel = new JLabel("Likes: " + picture.getLikes().size());
         likesLabel.setFont(new Font("Arial", Font.BOLD, 12));
         likesLabel.setForeground(Color.BLACK);
         likePanel.add(likesLabel);
